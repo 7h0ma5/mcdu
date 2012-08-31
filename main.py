@@ -8,8 +8,12 @@ import acars.api
 import common.xplane
 import common.avionics
 
-from configparser import SafeConfigParser
 import os, sys, pyglet
+
+try:
+    from configparser import SafeConfigParser
+except ImportError:
+    from ConfigParser import SafeConfigParser
 
 if __name__ == "__main__":
     config = SafeConfigParser()

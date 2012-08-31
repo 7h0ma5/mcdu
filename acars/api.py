@@ -1,6 +1,11 @@
-import urllib.parse
-import urllib.request
 import time
+
+try:
+    from urllib.parse import urlencode
+    from urllib.request import urlopen
+except ImportError:
+    from urllib import urlencode
+    from urllib2 import urlopen
 
 API_URL = "http://www.hoppie.nl/acars/system/connect.html"
 
@@ -18,10 +23,10 @@ class ACARS_API(object):
         }
 
         default_data.update(data)
-        params = urllib.parse.urlencode(default_data)
+        params = urlencode(default_data)
         path = "%s?%s" % (API_URL, params)
 
-        res = urllib.request.urlopen(path)
+        res = urlopen(path)
 
         return res.read()
 
