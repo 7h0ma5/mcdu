@@ -2,7 +2,7 @@
 
 import sys, pyglet
 
-from mcdu.mcdu import MCDU
+from mcdu.core import MCDU
 from mcdu.acars import ACARS
 from mcdu.atc import ATC
 from mcdu.network import ACARS_API
