@@ -8,7 +8,7 @@ import acars.api
 import common.xplane
 import common.avionics
 
-import os, sys, pyglet
+import sys, pyglet
 
 try:
     from configparser import SafeConfigParser
@@ -17,7 +17,7 @@ except ImportError:
 
 if __name__ == "__main__":
     config = SafeConfigParser()
-    config.readfp(open("config/defaults.cfg"))
+    config.readfp(open("config/defaults.cfg", "rb"))
     config.read("config/mcdu.cfg")
 
     avionics = common.avionics.Avionics()
