@@ -1,33 +1,29 @@
 #!/usr/bin/env python
 
-from acars.acars import ACARS
-from acars.atc import ATC
-from mcdu.mcdu import MCDU
-
-import acars.api
-import common.xplane
-import common.avionics
-
 import sys, pyglet
+
+from mcdu.mcdu import MCDU
+from mcdu.acars import ACARS
+from mcdu.atc import ATC
+from mcdu.network import ACARS_API
+from mcdu.avionics import Avionics, XPlaneReceiver
 
 try:
     from configparser import SafeConfigParser
 except ImportError:
     from ConfigParser import SafeConfigParser
 
-if __name__ == "__main__":
+def run():
     config = SafeConfigParser()
     config.readfp(open("config/defaults.cfg"))
     config.read("config/mcdu.cfg")
 
-    avionics = common.avionics.Avionics()
-
-    receiver = common.xplane.Receiver(avionics)
+    receiver = XPlaneReceiver()
     receiver.start()
 
-    api = acars.api.ACARS_API(config.get("ACARS", "logon"), avionics)
-    acars = ACARS(avionics, api)
-    atc = ATC(avionics, api)
+    api = ACARS_API(config.get("ACARS", "logon"))
+    acars = ACARS(api)
+    atc = ATC(api)
 
     mcdu = MCDU()
     mcdu.subsystem_register(acars)
@@ -46,3 +42,6 @@ if __name__ == "__main__":
         pyglet.app.exit()
         receiver.stop()
         sys.exit(0)
+
+if __name__ == "__main__":
+    run()

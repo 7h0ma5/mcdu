@@ -4,9 +4,8 @@ from mcdu.page import Page
 class ACARS(Subsystem):
     name = "ACARS"
 
-    def __init__(self, avionics, api):
+    def __init__(self, api):
         Subsystem.__init__(self)
-        self.avionics = avionics
         self.api = api
         self.state = "preflight"
 

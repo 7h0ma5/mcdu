@@ -1,11 +1,18 @@
+class Avionics(object):
+    pos = (0.0, 0.0)
+    speed = 0
+    hdg = 0
+    alt = 0
+    wind = "0/0"
+    temp = 0
+
 import threading
 import socket
 import struct
 
-class Receiver(threading.Thread):
-    def __init__(self, avionics):
+class XPlaneReceiver(threading.Thread):
+    def __init__(self):
         threading.Thread.__init__(self)
-        self.avionics = avionics
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.settimeout(2)
 
@@ -33,15 +40,15 @@ class Receiver(threading.Thread):
             packet = struct.unpack("i8f", data[i:i+36]);
 
             if packet[0] == 3:
-                self.avionics.speed = int(round(packet[4]))
+                Avionics.speed = int(round(packet[4]))
             elif packet[0] == 5:
                 wind_heading = int(round(packet[5]))
                 wind_speed = int(round(packet[4]))
-                self.avionics.wind = "%i/%i" % (wind_heading, wind_speed)
+                Avionics.wind = "%i/%i" % (wind_heading, wind_speed)
             elif packet[0] == 6:
-                self.avionics.temp = int(round(packet[2]))
+                Avionics.temp = int(round(packet[2]))
             elif packet[0] == 17:
-                self.avionics.hdg = int(round(packet[3]))
+                Avionics.hdg = int(round(packet[3]))
             elif packet[0] == 20:
-                self.avionics.pos = (round(packet[1], 8), round(packet[2], 8))
-                self.avionics.alt = int(round(packet[3]))
+                Avionics.pos = (round(packet[1], 8), round(packet[2], 8))
+                Avionics.alt = int(round(packet[3]))

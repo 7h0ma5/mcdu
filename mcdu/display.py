@@ -2,7 +2,7 @@ from pyglet.text.document import UnformattedDocument
 from pyglet.text.layout import TextLayout
 from pyglet.window import key
 
-from .layout import Layout
+from mcdu.layout import Layout
 import pyglet
 import string
 

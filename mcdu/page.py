@@ -31,6 +31,7 @@ class Page(object):
         if row_index < len(self.mcdu.rows):
             row = self.mcdu.rows[row_index]
 
+            # find the selected column
             if not row:
                 return
             elif side == "right" and len(row) < 2:
@@ -40,6 +41,9 @@ class Page(object):
             elif side == "right":
                 col_index = len(row)-1
 
+            # if the scratchpad is not empty, try to insert
+            # the value into the selected row, otherwise copy
+            # the selected row into the scratchpad
             if self.mcdu.scratch:
                 try:
                     self.update_field((row_index, col_index), str(self.mcdu.scratch))
@@ -52,7 +56,6 @@ class Page(object):
                 self.mcdu.scratch_set(row[col_index])
 
     def update_field(self, pos, value):
-        self.rows[pos[0]][pos[1]] = value
         self.mcdu.rows[pos[0]][pos[1]] = value
 
     def validate(self, regex, value):

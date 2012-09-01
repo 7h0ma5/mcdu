@@ -1,5 +1,3 @@
-import time
-
 try:
     from urllib.parse import urlencode
     from urllib.request import urlopen
@@ -7,12 +5,14 @@ except ImportError:
     from urllib import urlencode
     from urllib2 import urlopen
 
+from mcdu.avionics import Avionics
+import time
+
 API_URL = "http://www.hoppie.nl/acars/system/connect.html"
 
 class ACARS_API(object):
-    def __init__(self, logon, avionics):
+    def __init__(self, logon):
         self.logon = logon
-        self.avionics = avionics
 
     def request(self, req_type, data={}):
         default_data = {
@@ -43,13 +43,13 @@ class ACARS_API(object):
             "REPORT",
             callsign,
             time.strftime("%d%H%M", time.gmtime()),
-            str(self.avionics.pos[0]),
-            str(self.avionics.pos[1]),
-            str(self.avionics.alt),
-            str(self.avionics.hdg),
-            str(self.avionics.speed),
-            self.avionics.wind,
-            str(self.avionics.temp),
+            str(Avionics.pos[0]),
+            str(Avionics.pos[1]),
+            str(Avionics.alt),
+            str(Avionics.hdg),
+            str(Avionics.speed),
+            Avionics.wind,
+            str(Avionics.temp),
             "LVL",
         ]
 

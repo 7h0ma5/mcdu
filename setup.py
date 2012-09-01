@@ -1,9 +1,11 @@
 from setuptools import setup
+
 from glob import glob
 import sys
 
 if sys.platform == "darwin":
     extra_options = dict(
+        app=["bin/mcdu"],
         setup_requires=["py2app"],
         options=dict(
             py2app=dict(
@@ -17,12 +19,11 @@ else:
 
 setup(
     name="MCDU",
-    license="GPL",
+    license="GNU GPL v3",
     version="1.0",
-    app=["main.py"],
-    data_files = [
-        ("config", glob("config/*")),
-        ("res", glob("res/*")),
-    ],
+    tests_require='nose',
+    test_suite='nose.collector',
+    packages=["mcdu"],
+    scripts=["bin/mcdu"],
     **extra_options
 )
