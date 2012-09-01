@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 from acars.acars import ACARS
 from acars.atc import ATC
@@ -17,7 +17,7 @@ except ImportError:
 
 if __name__ == "__main__":
     config = SafeConfigParser()
-    config.readfp(open("config/defaults.cfg", "rb"))
+    config.readfp(open("config/defaults.cfg"))
     config.read("config/mcdu.cfg")
 
     avionics = common.avionics.Avionics()
