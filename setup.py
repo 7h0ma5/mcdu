@@ -5,7 +5,7 @@ import sys
 
 if sys.platform == "darwin":
     extra_options = dict(
-        app=["bin/mcdu"],
+        app=["mcdu/main.py"],
         setup_requires=["py2app"],
         options=dict(
             py2app=dict(
@@ -24,6 +24,10 @@ setup(
     tests_require='nose',
     test_suite='nose.collector',
     packages=["mcdu"],
-    scripts=["bin/mcdu"],
+    scripts=["mcdu/main.py"],
+    data_files = [
+        ("mcdu", glob("config/*")),
+        ("mcdu", glob("res/*")),
+    ],
     **extra_options
 )

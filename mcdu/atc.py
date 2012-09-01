@@ -1,4 +1,4 @@
-from mcdu.subsystem import Subsystem
+from subsystem import Subsystem
 
 class ATC(Subsystem):
     name = "ATC"

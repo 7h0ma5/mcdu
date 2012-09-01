@@ -1,5 +1,5 @@
-from mcdu.subsystem import Subsystem
-from mcdu.page import Page
+from subsystem import Subsystem
+from page import Page
 
 class ACARS(Subsystem):
     name = "ACARS"

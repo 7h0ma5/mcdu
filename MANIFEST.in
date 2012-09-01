@@ -1,3 +1,5 @@
-include res/*
-include config/*
 include LICENSE
+include MANIFEST.IN
+graft res/
+graft config/
+graft tests/

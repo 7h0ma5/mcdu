@@ -2,11 +2,11 @@
 
 import sys, pyglet
 
-from mcdu.core import MCDU
-from mcdu.acars import ACARS
-from mcdu.atc import ATC
-from mcdu.network import ACARS_API
-from mcdu.avionics import Avionics, XPlaneReceiver
+from core import MCDU
+from acars import ACARS
+from atc import ATC
+from network import ACARS_API
+from avionics import Avionics, XPlaneReceiver
 
 try:
     from configparser import SafeConfigParser
