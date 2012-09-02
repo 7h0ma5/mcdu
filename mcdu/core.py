@@ -90,19 +90,13 @@ class MenuPage(Page):
     title = "MCDU MENU"
 
     def init(self):
-        self.rows = [[self.title]]
-
         for i in range(len(self.mcdu.subsystems)):
             subsystem = self.mcdu.subsystems[i]
-            self.rows.append(None)
-            self.rows.append(["<" + subsystem.name, ""])
-
-        for i in range(len(self.rows), 13):
-            self.rows.append(None)
+            self.field(i, "", "<" + subsystem.name)
 
     def lsk(self, pos):
-        side, num = pos
+        num, side = pos
 
-        if num-1 < len(self.mcdu.subsystems):
-            sys = self.mcdu.subsystems[num-1]
+        if num < len(self.mcdu.subsystems):
+            sys = self.mcdu.subsystems[num]
             self.mcdu.subsystem_activate(sys)

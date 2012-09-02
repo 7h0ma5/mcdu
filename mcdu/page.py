@@ -6,6 +6,7 @@ class Page(object):
     def __new__(cls, *args):
         if not cls._instance:
             cls._instance = super(Page, cls).__new__(cls, *args)
+            cls._instance.fields = None
 
         return cls._instance
 
@@ -13,57 +14,99 @@ class Page(object):
         self.mcdu = mcdu
         self.sys = sys
 
-        if not getattr(self, "rows", None):
+        if not self.fields:
+            self.fields = [None for i in range(6)]
             init = getattr(self, "init", None)
-            if init:
-                init()
-            else:
-                self.rows = [None for i in range(13)]
+            if init: init()
 
     def refresh(self):
-        for i in range(len(self.rows)):
-            self.mcdu.row_set(i, self.rows[i])
+        self.mcdu.row_set(0, [self.title])
+
+        for i in range(6):
+            fields = self.fields[i]
+            if not fields: continue
+
+            title = []
+            for field in fields:
+                title.append(field.title)
+
+            if len(title) == 1: title.append("")
+            self.mcdu.row_set(i*2+1, title)
+
+            value = []
+            for field in fields:
+                value.append(field.value)
+
+            if len(value) == 1: value.append("")
+            self.mcdu.row_set(i*2+2, value)
+
+    def field(self, index, title, value, **kwargs):
+        field = Field(title, value, **kwargs)
+
+        if not self.fields[index]:
+            self.fields[index] = [field]
+        else:
+            self.fields[index].append(field)
+
+    def field_update(self, index, col, value):
+        field = self.fields[index][col]
+        field.value = value
+        self.field_render(index, col, value)
+
+    def field_render(self, index, col, value):
+        self.mcdu.rows[index*2+2][col] = value
+        self.mcdu.row_render(index*2+2)
 
     def lsk(self, pos):
-        side, num = pos
-        row_index = num*2
+        num, side = pos
 
-        if row_index < len(self.mcdu.rows):
-            row = self.mcdu.rows[row_index]
+        fields = self.fields[num]
 
-            # find the selected column
-            if not row:
-                return
-            elif side == "right" and len(row) < 2:
-                return
-            elif side == "left":
-                col_index = 0
-            elif side == "right":
-                col_index = len(row)-1
+        # get the selected field
+        if not fields:
+            return
+        elif side == 1 and len(fields) < 2:
+            return
+        elif side == 0:
+            field = fields[0]
+        elif side == 1:
+            field = fields[-1]
+        else:
+            return
 
-            # if the scratchpad is not empty, try to insert
-            # the value into the selected row, otherwise copy
-            # the selected row into the scratchpad
-            if self.mcdu.scratch:
-                try:
-                    self.update_field((row_index, col_index), str(self.mcdu.scratch))
-                except ValueError:
-                    self.mcdu.scratch_set("INVALID FORMAT")
-                else:
-                    self.mcdu.row_render(row_index)
-                    self.mcdu.scratch_clear()
+        if field.action:
+            field.action()
+            return
+
+        # if the scratchpad is not empty, try to insert
+        # the value into the selected row, otherwise copy
+        # the selected row into the scratchpad
+        if self.mcdu.scratch:
+            value = self.mcdu.scratch
+            try:
+                field.validate(value)
+                if (field.update): field.update(value)
+            except ValueError:
+                self.mcdu.scratch_set("INVALID FORMAT")
             else:
-                self.mcdu.scratch_set(row[col_index])
+                self.field_render(num, side, value)
+                self.mcdu.scratch_clear()
+        else:
+            self.mcdu.scratch_set(field.value)
 
-    def update_field(self, pos, value):
-        self.mcdu.rows[pos[0]][pos[1]] = value
+class Field(object):
+    flightno = "^[A-Z]{3}[0-9A-Z]{1,4}$"
+    time = "^([01][0-9]|2[0-3])[0-5][0-9]Z$"
+    icao = "^[A-Z]{4}$"
 
-    def validate(self, regex, value):
-        if not re.match(regex, value):
+    def __init__(self, title, value, **kwargs):
+        self.title = title
+        self.value = value
+
+        self.format = kwargs.pop("format", None)
+        self.action = kwargs.pop("action", None)
+        self.update = kwargs.pop("update", None)
+
+    def validate(self, value):
+        if self.format and not re.match(self.format, value):
             raise ValueError
-
-    def validate_time(self, value):
-        self.validate("^([01][0-9]|2[0-3])[0-5][0-9]Z$", value)
-
-    def validate_icao(self, value):
-        self.validate("^[A-Z]{4}$", value)

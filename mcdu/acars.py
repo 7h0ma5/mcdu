@@ -1,28 +1,32 @@
 from mcdu.subsystem import Subsystem
-from mcdu.page import Page
+from mcdu.page import Page, Field
 
 class ACARS(Subsystem):
     name = "ACARS"
 
+    preflight = 1
+    inflight = 2
+    postflight = 3
+
     def __init__(self, api):
         Subsystem.__init__(self)
         self.api = api
-        self.state = "preflight"
+        self.state = ACARS.preflight
 
         self.flightno = ""
         self.origin = ""
         self.dest = ""
         self.plan_dep = ""
         self.eta = ""
-        self.alternt = ""
+        self.altrnt = ""
         self.company = ""
 
     def activate(self):
-        if self.state == "preflight":
+        if self.state == ACARS.preflight:
             self.mcdu.page_set(PreflightPage)
-        elif self.state == "inflight":
+        elif self.state == ACARS.inflight:
             self.mcdu.page_set(InflightPage)
-        elif self.state == "postflight":
+        elif self.state == ACARS.postflight:
             self.mcdu.page_set(PostflightPage)
 
     def report(self):
@@ -32,113 +36,93 @@ class PreflightPage(Page):
     title = "ACARS PREFLIGHT"
 
     def init(self):
-        self.rows = [
-            [self.title],
-            ["SYSTEM INIT", "FLT NO"],
-            ["<ARM", "_______"],
-            ["ORIGIN", "PLAN DEP"],
-            ["____", "_____"],
-            ["DEST", "ETA"],
-            ["____", "_____"],
-            ["ALTRNT", "COMPANY"],
-            ["____", "___"],
-            ["RECEIVED", ""],
-            ["<MESSAGES", "REQUESTS>"],
-            ["ACARS", ""],
-            ["<INDEX", "INFLIGHT>"],
-        ]
+        self.field(0, "SYSTEM INIT", "<ARM", action=self.arm)
+        self.field(0, "FLT NO", "_"*7, format=Field.flightno, update=self.flightno)
+        self.field(1, "ORIGIN", "_"*4, format=Field.icao, update=self.origin)
+        self.field(1, "PLAN DEP", "_"*5, format=Field.time, update=self.plan_dep)
+        self.field(2, "DEST", "_"*4, format=Field.icao, update=self.dest)
+        self.field(2, "ETA", "_"*5,  format=Field.time, update=self.eta)
+        self.field(3, "ALTRNT", "_"*4, format=Field.icao, update=self.altrnt)
+        self.field(3, "COMPANY", "___", format="^[A-Z]{3}$", update=self.company)
+        self.field(4, "RECEIVED", "<MESSAGES", action=self.messages)
+        self.field(4, "", "REQUESTS>", action=self.requests)
+        self.field(5, "ACARS", "<INDEX", action=self.index)
+        self.field(5, "", "INFLIGHT>", action=self.inflight)
 
-    def lsk(self, pos):
-        if pos == ("left", 6):
-            print("index!")
-        elif pos == ("right", 6):
-            self.sys.state = "inflight"
-            self.mcdu.page_set(InflightPage)
-        else:
-            Page.lsk(self, pos)
+    def arm(self):
+        print("arm!")
+        self.field_update(0, 0, "ARMED")
 
-    def update_field(self, pos, value):
-        if pos == (2, 1):
-            self.validate("^[A-Z]{3}[0-9A-Z]{1,4}$", value)
-            self.sys.flightno = value
+    def flightno(self, value):
+        self.sys.flightno = value
 
-        elif pos == (4, 0):
-            self.validate_icao(value)
-            self.sys.origin = value
+    def origin(self, value):
+        self.sys.origin = value
 
-        elif pos == (4, 1):
-            self.validate_time(value)
-            self.sys.plan_dep = value
+    def plan_dep(self, value):
+        self.sys.plan_dep = value
 
-        elif pos == (6, 0):
-            self.validate_icao(value)
-            self.sys.dest = value
+    def dest(self, value):
+        self.sys.dest = value
 
-        elif pos == (6, 1):
-            self.validate_time(value)
-            self.sys.eta = value
+    def eta(self, value):
+        self.sys.eta = value
 
-        elif pos == (8, 0):
-            self.validate_icao(value)
-            self.sys.alternt = value
+    def altrnt(self, value):
+        self.sys.altrnt = value
 
-        elif pos == (8, 1):
-            self.validate("^[A-Z]{3}$", value)
-            self.sys.company = value
+    def company(self, value):
+        self.sys.company = value
 
-        else:
-            return
+    def messages(self):
+        print("messages")
 
-        Page.update_field(self, pos, value)
+    def requests(self):
+        print("requests")
 
+    def index(self):
+        print("index")
+
+    def inflight(self):
+        self.sys.state = ACARS.inflight
+        self.mcdu.page_set(InflightPage)
 
 class InflightPage(Page):
     title = "ACARS INFLIGHT"
 
     def init(self):
-        self.rows = [
-            [self.title],
-            ["POSITION", "ETA"],
-            ["<REPORT", self.sys.eta],
-            ["DEVIATE", ""],
-            [self.sys.alternt, ""],
-            None,
-            None,
-            None,
-            None,
-            ["RECEIVED", ""],
-            ["<MESSAGES", "REQUESTS>"],
-            ["ACARS", ""],
-            ["<INDEX", "POSTFLIGHT>"],
-        ]
+        self.field(0, "POSITION", "<REPORT", action=self.report)
+        self.field(0, "ETA", self.sys.eta, format=Field.time, update=self.eta)
+        self.field(1, "DEVIATE", self.sys.altrnt, format=Field.icao, update=self.deviate)
+        self.field(4, "RECEIVED", "<MESSAGES", action=self.messages)
+        self.field(4, "", "REQUESTS>", action=self.requests)
+        self.field(5, "ACARS", "<INDEX", action=self.index)
+        self.field(5, "", "POSTFLIGHT>", action=self.postflight)
 
-    def lsk(self, pos):
-        if pos == ("left", 1):
-            self.sys.report()
-        elif pos == ("left", 6):
-            print("index!")
-        elif pos == ("right", 6):
-            self.sys.state = "postflight"
-            self.mcdu.page_set(PostflightPage)
-        else:
-            Page.lsk(self, pos)
+    def report(self):
+        self.sys.report()
+
+    def eta(self, value):
+        self.sys.eta = value
+
+    def deviate(self, value):
+        self.sys.altrnt = value
+
+    def messages(self):
+        print("messages")
+
+    def requests(self):
+        print("requests")
+
+    def index(self):
+        print("index")
+
+    def postflight(self):
+        self.sys.state = ACARS.postflight
+        self.mcdu.page_set(PostflightPage)
 
 class PostflightPage(Page):
     title = "ACARS POSTFLIGHT"
 
     def init(self):
-        self.rows = [
-            [self.title],
-            ["POSITION", "ETA"],
-            ["<REPORT", self.sys.eta],
-            ["DEVIATE", ""],
-            [self.sys.alternt, ""],
-            None,
-            None,
-            None,
-            None,
-            ["RECEIVED", ""],
-            ["<MESSAGES", "REQUESTS>"],
-            ["ACARS", ""],
-            ["<INDEX", ""],
-        ]
+        pass

@@ -66,9 +66,9 @@ class Display(pyglet.window.Window):
         elif button == "MENU":
             self.mcdu.menu()
         elif button.startswith("LSK") and len(button) == 5:
-            side = "right" if button[4] == "R" else "left"
-            num = button[3]
-            self.mcdu.lsk((side, int(num)))
+            side = 1 if button[4] == "R" else 0
+            num = int(button[3])-1
+            self.mcdu.lsk((num, side))
         else:
             self.mcdu.scratch_input(button)
 
