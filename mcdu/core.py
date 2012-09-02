@@ -1,5 +1,5 @@
-from display import Display
-from page import Page
+from mcdu.display import Display
+from mcdu.page import Page
 
 class MCDU():
     def __init__(self):

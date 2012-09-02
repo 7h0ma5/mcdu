@@ -2,7 +2,7 @@ from pyglet.text.document import UnformattedDocument
 from pyglet.text.layout import TextLayout
 from pyglet.window import key
 
-from layout import Layout
+from mcdu.layout import Layout
 import pyglet
 import string
 
@@ -13,8 +13,7 @@ class Display(pyglet.window.Window):
         self.mcdu = mcdu
         self.layout = Layout()
 
-        bg_file = open(self.layout.image, "rb")
-        bg_image = pyglet.image.load("image.png", file=bg_file)
+        bg_image = pyglet.image.load("image.png")
         self.bg = pyglet.sprite.Sprite(bg_image)
 
         for i in range(14):

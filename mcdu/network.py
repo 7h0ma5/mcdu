@@ -5,7 +5,7 @@ except ImportError:
     from urllib import urlencode
     from urllib2 import urlopen
 
-from avionics import Avionics
+from mcdu.avionics import Avionics
 import time
 
 API_URL = "http://www.hoppie.nl/acars/system/connect.html"

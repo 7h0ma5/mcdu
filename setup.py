@@ -1,4 +1,4 @@
-from setuptools import setup
+from distutils.core import setup
 
 from glob import glob
 import sys
@@ -20,14 +20,15 @@ else:
 setup(
     name="MCDU",
     license="GNU GPL v3",
+    author="Thomas Gatzweiler",
+    author_email="mail@thomasgatzweiler.com",
+    url="https://github.com/7h0ma5/mcdu/",
     version="1.0",
-    tests_require='nose',
-    test_suite='nose.collector',
     packages=["mcdu"],
     scripts=["mcdu/main.py"],
     data_files = [
-        ("mcdu", glob("config/*")),
-        ("mcdu", glob("res/*")),
+        ("share/mcdu/config", glob("config/*")),
+        ("share/mcdu/res", glob("res/*"))
     ],
     **extra_options
 )

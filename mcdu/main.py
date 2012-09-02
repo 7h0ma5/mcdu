@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-import sys, pyglet
+from mcdu.core import MCDU
+from mcdu.acars import ACARS
+from mcdu.atc import ATC
+from mcdu.network import ACARS_API
+from mcdu.avionics import Avionics, XPlaneReceiver
 
-from core import MCDU
-from acars import ACARS
-from atc import ATC
-from network import ACARS_API
-from avionics import Avionics, XPlaneReceiver
+import os, sys, pyglet
+import pyglet.resource
 
 try:
     from configparser import SafeConfigParser
@@ -14,9 +15,14 @@ except ImportError:
     from ConfigParser import SafeConfigParser
 
 def run():
+    pyglet.resource.path.append(os.getcwd())
+    pyglet.resource.path.append("/usr/share/mcdu")
+    pyglet.resource.path.append("/usr/local/share/mcdu")
+    pyglet.resource.reindex()
+
     config = SafeConfigParser()
-    config.readfp(open("config/defaults.cfg"))
-    config.read("config/mcdu.cfg")
+    config.readfp(pyglet.resource.file("config/defaults.cfg", "r"))
+    config.read("~/.config/mcdu.cfg", "config/mcdu.cfg")
 
     receiver = XPlaneReceiver()
     receiver.start()
