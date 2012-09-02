@@ -1,6 +1,7 @@
 from pyglet.text.document import UnformattedDocument
 from pyglet.text.layout import TextLayout
 from pyglet.window import key
+import pyglet.resource
 
 from mcdu.layout import Layout
 import pyglet
@@ -13,7 +14,7 @@ class Display(pyglet.window.Window):
         self.mcdu = mcdu
         self.layout = Layout()
 
-        bg_image = pyglet.image.load("image.png")
+        bg_image = pyglet.resource.image("res/mcdu.png")
         self.bg = pyglet.sprite.Sprite(bg_image)
 
         for i in range(14):

@@ -25,7 +25,7 @@ setup(
     url="https://github.com/7h0ma5/mcdu/",
     version="1.0",
     packages=["mcdu"],
-    scripts=["mcdu/main.py"],
+    scripts=["bin/mcdu"],
     data_files = [
         ("share/mcdu/config", glob("config/*")),
         ("share/mcdu/res", glob("res/*"))
