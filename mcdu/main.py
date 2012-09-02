@@ -22,7 +22,8 @@ def run():
 
     config = SafeConfigParser()
     config.readfp(pyglet.resource.file("config/defaults.cfg", "r"))
-    config.read("~/.config/mcdu.cfg", "config/mcdu.cfg")
+    config.read("~/.config/mcdu.cfg")
+    config.read("config/mcdu.cfg")
 
     receiver = XPlaneReceiver()
     receiver.start()

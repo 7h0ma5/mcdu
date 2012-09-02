@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 from glob import glob
 import sys
@@ -12,10 +12,19 @@ if sys.platform == "darwin":
                 arch="i386",
                 argv_emulation=True
             )
-        )
+        ),
+        data_files = [
+            ("config", glob("config/*")),
+            ("res", glob("res/*"))
+        ],
     )
 else:
-    extra_options = dict()
+    extra_options = dict(
+        data_files = [
+            ("share/mcdu/config", glob("config/*")),
+            ("share/mcdu/res", glob("res/*"))
+        ],
+    )
 
 setup(
     name="MCDU",
@@ -26,9 +35,5 @@ setup(
     version="1.0",
     packages=["mcdu"],
     scripts=["bin/mcdu"],
-    data_files = [
-        ("share/mcdu/config", glob("config/*")),
-        ("share/mcdu/res", glob("res/*"))
-    ],
     **extra_options
 )
