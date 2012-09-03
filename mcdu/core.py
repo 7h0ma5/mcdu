@@ -13,23 +13,33 @@ class MCDU():
         self.row_set(8, ["BY THOMAS GATZWEILER"])
 
     def subsystem_register(self, subsystem):
+        """Register and start the given subsystem."""
         self.subsystems.append(subsystem)
         subsystem.connect(self)
         subsystem.start()
 
     def subsystem_activate(self, subsystem):
+        """Activate the given subsystem."""
         self.sys = subsystem
         subsystem.activate()
 
     def clear(self):
+        """Clear the whole screen."""
         self.rows = [None for i in range(13)]
         self.render()
 
     def row_set(self, index, value):
+        """Set a row. The index has to be between 0 and 12. The value
+        has to contain a list with three strings at maximum.
+        """
         self.rows[index] = value
         self.row_render(index)
 
     def row_render(self, index):
+        """Write a row to the screen. If the row contains one string
+        it will be centered. If it containes two strings the first
+        will be left adjusted and the second will be right adjusted.
+        """
         row = self.rows[index]
 
         if not row:
@@ -46,33 +56,43 @@ class MCDU():
         self.display.row_write(index, text)
 
     def menu(self):
+        """Show the menu page."""
         self.page_set(MenuPage)
 
     def page_set(self, page):
+        """Switch to the given page."""
         self.clear()
         self.page = page(self, self.sys)
         self.page.refresh()
 
     def lsk(self, pos):
+        """Forward the pressed Line Select Key to the page."""
         self.page.lsk(pos)
 
-    def scratch_input(self, symbol):
-        self.scratch += symbol
+    def scratch_input(self, text):
+        """Append a string to the scratchpad."""
+        self.scratch += text
         self.scratch_update()
 
-    def scratch_set(self, value):
-        self.scratch = value
+    def scratch_set(self, text):
+        """Change the scratchpad to the given string."""
+        self.scratch = text
         self.scratch_update()
 
     def scratch_delete(self):
+        """Delete the last character of the scratchpad."""
         if len(self.scratch) > 0:
             self.scratch = self.scratch[:-1]
             self.scratch_update()
 
     def scratch_clear(self):
+        """Clear the scratchpad."""
         self.scratch_set("")
 
     def scratch_update(self):
+        """Write the scratchpad to the screen. If it contains more
+        than 24 characters, only the last 24 characters are shown.
+        """
         if (len(self.scratch) > 24):
             text = "<" + self.scratch[-23:]
         else:
@@ -81,6 +101,7 @@ class MCDU():
         self.display.row_write(13, text)
 
     def render(self):
+        """Render all rows."""
         for i in range(len(self.rows)):
             self.row_render(i)
 
