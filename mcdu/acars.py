@@ -83,6 +83,7 @@ class PreflightPage(Page):
         self.field(5, "", "INFLIGHT>", action=self.inflight)
 
     def arm(self):
+        self.avionics.progress = 0
         self.sys.armed = True
         self.field_update(0, 0, "ARMED")
 
