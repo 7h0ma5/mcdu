@@ -8,6 +8,9 @@ class ATC(Subsystem):
         Subsystem.__init__(self)
         self.mcdu = mcdu
 
+    def run(self):
+        pass
+
     def activate(self):
         self.mcdu.page_set(LogonPage)
 

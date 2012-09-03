@@ -45,9 +45,11 @@ def run():
         traceback.print_exc()
         print("quitting...")
     finally:
+        receiver.stop()
+        acars.stop()
+        atc.stop()
         mcdu.display.close()
         pyglet.app.exit()
-        receiver.stop()
         sys.exit(0)
 
 if __name__ == "__main__":

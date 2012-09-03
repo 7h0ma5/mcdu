@@ -48,7 +48,7 @@ class Display(pyglet.window.Window):
 
     def on_text(self, text):
         allowed = string.digits + string.ascii_uppercase + " /."
-        text = text.upper()
+        text = str(text).upper()
         if text in allowed:
             self.mcdu.scratch_input(text)
 

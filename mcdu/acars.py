@@ -28,14 +28,18 @@ class ACARS(Subsystem):
         self.progress = []
 
     def run(self):
-        while True:
-            if self.avionics.progress > len(self.progress):
-                ptime = time.strftime("%H%MZ", time.gmtime())
-                self.progress.append(ptime)
-                if self.armed:
-                    self.report()
+        i = 0
+        while self.running:
+            if not i % 10:
+                self.progress_update()
+            time.sleep(1)
 
-            time.sleep(10)
+    def progress_update(self):
+        if self.avionics.progress > len(self.progress):
+            ptime = time.strftime("%H%MZ", time.gmtime())
+            self.progress.append(ptime)
+            if self.armed:
+                self.report()
 
     def activate(self):
         if self.state == ACARS.preflight:
