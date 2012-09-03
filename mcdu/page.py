@@ -90,7 +90,7 @@ class Page(object):
             except ValueError:
                 self.mcdu.scratch_set("INVALID FORMAT")
             else:
-                self.field_render(num, side, value)
+                self.field_update(num, side, value)
                 self.mcdu.scratch_clear()
         else:
             self.mcdu.scratch_set(field.value)
