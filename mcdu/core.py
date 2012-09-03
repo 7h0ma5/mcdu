@@ -4,9 +4,9 @@ from mcdu.page import Page
 class MCDU():
     def __init__(self):
         self.display = Display(self)
-        self.scratch = ""
-        self.subsystems = []
         self.sys = None
+        self.subsystems = []
+        self.scratch = ""
 
         self.clear()
         self.row_set(4, ["MCDU 1.0"])

@@ -112,7 +112,7 @@ class PreflightPage(Page):
         print("messages")
 
     def requests(self):
-        print("requests")
+        self.mcdu.page_set(RequestsPage)
 
     def index(self):
         print("index")
@@ -146,6 +146,7 @@ class InflightPage(Page):
         print("messages")
 
     def requests(self):
+        self.mcdu.page_set(RequestsPage)
         print("requests")
 
     def index(self):
@@ -157,6 +158,12 @@ class InflightPage(Page):
 
 class PostflightPage(Page):
     title = "ACARS POSTFLIGHT"
+
+    def init(self):
+        pass
+
+class RequestsPage(Page):
+    title = "ACARS REQUESTS"
 
     def init(self):
         pass

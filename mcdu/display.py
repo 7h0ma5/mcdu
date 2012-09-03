@@ -59,6 +59,8 @@ class Display(pyglet.window.Window):
             self.mcdu.scratch_clear()
 
     def on_button_press(self, button):
+        if len(button) == 1:
+            self.mcdu.scratch_input(button)
         if button == "DEL":
             self.mcdu.scratch_delete()
         elif button == "CLR":
@@ -69,8 +71,6 @@ class Display(pyglet.window.Window):
             side = 1 if button[4] == "R" else 0
             num = int(button[3])-1
             self.mcdu.lsk((num, side))
-        else:
-            self.mcdu.scratch_input(button)
 
     def on_mouse_press(self, x, y, button, modifiers):
         for button in self.layout.buttons:
