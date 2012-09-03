@@ -13,11 +13,9 @@ class MCDU():
         self.row_set(8, ["BY THOMAS GATZWEILER"])
 
     def subsystem_register(self, subsystem):
-        subsystem.connect(self)
         self.subsystems.append(subsystem)
-
-    def subsystem_unregister(self, subsystem):
-        self.subsystems.remove(subsystem)
+        subsystem.connect(self)
+        subsystem.start()
 
     def subsystem_activate(self, subsystem):
         self.sys = subsystem

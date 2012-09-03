@@ -1,54 +1,64 @@
+import time
+
 class Avionics(object):
-    pos = (0.0, 0.0)
-    speed = 0
-    hdg = 0
-    alt = 0
-    wind = "0/0"
-    temp = 0
+    _instance = None
 
-import threading
-import socket
-import struct
+    def __new__(cls, *args):
+        if not cls._instance:
+            cls._instance = super(Avionics, cls).__new__(cls, *args)
+            cls._instance.init()
 
-class XPlaneReceiver(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.settimeout(2)
+        return cls._instance
+
+    def init(self):
+        self.active = False
+
+        self.pos = (0.0, 0.0)
+        self.speed = 0
+        self.hdg = 0
+        self.alt = 0
+        self.wind = "0/0"
+        self.temp = 0
+        self.brk = True
+        self.gear = True
+
+        self.hdg_change = 0
+        self.alt_change = 0
+
+        self.progress = 0
+
+    def update(self, data):
+        if self.active:
+            if "hdg" in data:
+                self.hdg_change += abs(self.hdg - data["hdg"])
+
+            if "alt" in data:
+                self.alt_change += abs(self.alt - data["alt"])
+
+            self.analyze()
+
+        for key, value in data.items():
+            setattr(self, key, value)
 
         self.active = True
 
-    def run(self):
-        self.sock.bind(("", 49003))
+    def analyze(self):
+        # detect out
+        if self.progress == 0:
+            if not self.brk:
+                self.progress += 1
 
-        while self.active:
-            try:
-                data, addr = self.sock.recvfrom(1024)
-                self.parse(data)
-            except socket.timeout:
-                pass
+        # detect off
+        elif self.progress == 1:
+            if not self.gear or self.alt_change > 200:
+                self.progress += 1
 
-    def stop(self):
-        self.active = False
-        self.sock.close()
+        # detect on
+        elif self.progress == 2:
+            if self.gear and self.speed < 50:
+                self.progress += 1
 
-    def parse(self, data):
-        header = struct.unpack("5s", data[:5])
-        data = data[5:]
-
-        for i in range(0, len(data), 36):
-            packet = struct.unpack("i8f", data[i:i+36]);
-
-            if packet[0] == 3:
-                Avionics.speed = int(round(packet[4]))
-            elif packet[0] == 5:
-                wind_heading = int(round(packet[5]))
-                wind_speed = int(round(packet[4]))
-                Avionics.wind = "%i/%i" % (wind_heading, wind_speed)
-            elif packet[0] == 6:
-                Avionics.temp = int(round(packet[2]))
-            elif packet[0] == 17:
-                Avionics.hdg = int(round(packet[3]))
-            elif packet[0] == 20:
-                Avionics.pos = (round(packet[1], 8), round(packet[2], 8))
-                Avionics.alt = int(round(packet[3]))
+        # detect in
+        elif self.progress == 3:
+            if not self.speed and self.brk:
+                self.progress += 1

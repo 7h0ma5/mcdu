@@ -5,9 +5,6 @@ except ImportError:
     from urllib import urlencode
     from urllib2 import urlopen
 
-from mcdu.avionics import Avionics
-import time
-
 API_URL = "http://www.hoppie.nl/acars/system/connect.html"
 
 class ACARS_API(object):
@@ -38,25 +35,10 @@ class ACARS_API(object):
         }
         return self.request("telex", data)
 
-    def ads_c(self, callsign, receiver):
-        package = [
-            "REPORT",
-            callsign,
-            time.strftime("%d%H%M", time.gmtime()),
-            str(Avionics.pos[0]),
-            str(Avionics.pos[1]),
-            str(Avionics.alt),
-            str(Avionics.hdg),
-            str(Avionics.speed),
-            Avionics.wind,
-            str(Avionics.temp),
-            "LVL",
-        ]
-
+    def progress(self, callsign, receiver, message):
         data = {
             "from": callsign,
             "to": receiver,
-            "packet": " ".join(package),
+            "packet": message,
         }
-
-        return self.request("ads-c", data)
+        return self.request("progress", data)

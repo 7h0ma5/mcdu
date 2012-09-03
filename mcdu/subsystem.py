@@ -1,6 +1,8 @@
-class Subsystem(object):
+import threading
+
+class Subsystem(threading.Thread):
     def __init__(self):
-        pass
+        threading.Thread.__init__(self)
 
     def connect(self, mcdu):
         self.mcdu = mcdu

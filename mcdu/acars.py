@@ -1,5 +1,8 @@
 from mcdu.subsystem import Subsystem
+from mcdu.avionics import Avionics
 from mcdu.page import Page, Field
+
+import time
 
 class ACARS(Subsystem):
     name = "ACARS"
@@ -11,8 +14,10 @@ class ACARS(Subsystem):
     def __init__(self, api):
         Subsystem.__init__(self)
         self.api = api
+        self.avionics = Avionics()
         self.state = ACARS.preflight
 
+        self.armed = False
         self.flightno = ""
         self.origin = ""
         self.dest = ""
@@ -20,6 +25,17 @@ class ACARS(Subsystem):
         self.eta = ""
         self.altrnt = ""
         self.company = ""
+        self.progress = []
+
+    def run(self):
+        while True:
+            if self.avionics.progress > len(self.progress):
+                ptime = time.strftime("%H%MZ", time.gmtime())
+                self.progress.append(ptime)
+                if self.armed:
+                    self.report()
+
+            time.sleep(10)
 
     def activate(self):
         if self.state == ACARS.preflight:
@@ -30,7 +46,24 @@ class ACARS(Subsystem):
             self.mcdu.page_set(PostflightPage)
 
     def report(self):
-        print(self.api.ads_c(self.flightno, self.company))
+        message = ["%s/%s" % (self.origin, self.dest)]
+
+        if len(self.progress) > 0:
+            message.append("OUT/" + self.progress[0])
+
+        if len(self.progress) > 1:
+            message.append("OFF/" + self.progress[1])
+
+        if len(self.progress) > 2:
+            message.append("ON/" + self.progress[2])
+
+        if len(self.progress) > 3:
+            message.append("IN/" + self.progress[3])
+
+        if len(self.progress) < 3 and self.eta:
+            message.append("ETA/" + self.eta)
+
+        self.api.progress(self.flightno, self.company, " ".join(message))
 
 class PreflightPage(Page):
     title = "ACARS PREFLIGHT"
@@ -50,7 +83,7 @@ class PreflightPage(Page):
         self.field(5, "", "INFLIGHT>", action=self.inflight)
 
     def arm(self):
-        print("arm!")
+        self.sys.armed = True
         self.field_update(0, 0, "ARMED")
 
     def flightno(self, value):

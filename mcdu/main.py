@@ -4,7 +4,7 @@ from mcdu.core import MCDU
 from mcdu.acars import ACARS
 from mcdu.atc import ATC
 from mcdu.network import ACARS_API
-from mcdu.avionics import Avionics, XPlaneReceiver
+from mcdu.xplane import XPlaneReceiver
 
 import os, sys, pyglet
 import pyglet.resource

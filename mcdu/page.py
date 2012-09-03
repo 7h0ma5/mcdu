@@ -82,10 +82,11 @@ class Page(object):
         # the value into the selected row, otherwise copy
         # the selected row into the scratchpad
         if self.mcdu.scratch:
+            if not field.update: return
             value = self.mcdu.scratch
             try:
                 field.validate(value)
-                if (field.update): field.update(value)
+                field.update(value)
             except ValueError:
                 self.mcdu.scratch_set("INVALID FORMAT")
             else:
