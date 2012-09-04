@@ -19,7 +19,7 @@ class ACARS_API(object):
             "logon": self.logon,
             "to": "TEST",
             "type": req_type,
-            "package": "",
+            "packet": "",
         }
 
         default_data.update(data)
@@ -29,6 +29,36 @@ class ACARS_API(object):
         res = urlopen(path)
 
         return res.read().decode("utf-8")
+
+    def parse_messages(self, data):
+        if not data.startswith("ok") or len(data) < 3:
+            return None
+
+        regex = "\{([a-zA-Z0-9]+) ([a-z\-]+) \{(.*?)\}\}"
+
+        for match in re.finditer(regex, data):
+            message = (match.group(2), match.group(1), match.group(3))
+            self.messages.append(message)
+
+    def poll(self, callsign):
+        data = {
+            "from": callsign,
+            "to": "SERVER",
+        }
+
+        res = self.request("poll", data)
+        self.parse_messages(res)
+
+    def poll_acars(self, callsign):
+        self.poll(callsign)
+
+        acars = []
+
+        for message in self.messages:
+            if message[0] in ["telex", "metar", "taf", "shorttaf", "ads-c"]:
+                acars.append(message)
+
+        return acars
 
     def telex(self, callsign, receiver, message):
         data = {
@@ -54,7 +84,7 @@ class ACARS_API(object):
         }
         resp = self.request("inforeq", data)
 
-        regex = "^ok \{server info \{(.*)\}\}$"
+        regex = "^ok \{server info \{(.*)\}\}"
         match = re.match(regex, resp)
 
         if (match):

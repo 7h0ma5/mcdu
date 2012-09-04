@@ -26,13 +26,18 @@ class ACARS(Subsystem):
         self.altrnt = ""
         self.company = ""
         self.progress = []
+        self.messages = []
 
     def run(self):
         i = 0
         while self.running:
             if not i % 10:
+                print(i)
                 self.progress_update()
+                self.fetch_messages()
+
             time.sleep(1)
+            i = i + 1
 
     def progress_update(self):
         if self.avionics.progress > len(self.progress):
@@ -40,6 +45,12 @@ class ACARS(Subsystem):
             self.progress.append(ptime)
             if self.armed:
                 self.report()
+
+    def fetch_messages(self):
+        if not self.flightno: return
+        messages = self.api.poll_acars(self.flightno)
+        self.messages.extend(messages)
+        print(messages)
 
     def activate(self):
         if self.state == ACARS.preflight:
@@ -116,7 +127,7 @@ class PreflightPage(Page):
         self.sys.company = value
 
     def messages(self):
-        print("messages")
+        self.mcdu.page_set(MessagesPage)
 
     def requests(self):
         self.mcdu.page_set(RequestsPage)
@@ -150,11 +161,10 @@ class InflightPage(Page):
         self.sys.altrnt = value
 
     def messages(self):
-        print("messages")
+        self.mcdu.page_set(MessagesPage)
 
     def requests(self):
         self.mcdu.page_set(RequestsPage)
-        print("requests")
 
     def index(self):
         print("index")
@@ -168,6 +178,12 @@ class PostflightPage(Page):
 
     def init(self):
         pass
+
+class MessagesPage(Page):
+    title = "ACARS MESSAGES"
+
+    def refresh(self):
+        Page.refresh(self)
 
 class RequestsPage(Page):
     title = "ACARS REQUESTS"
@@ -235,4 +251,4 @@ class WeatherRequestPage(Page):
         self.mcdu.page_set(RequestsPage)
 
     def messages(self):
-        pass
+        self.mcdu.page_set(MessagesPage)
