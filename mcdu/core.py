@@ -5,6 +5,7 @@ class MCDU():
     def __init__(self):
         self.display = Display(self)
         self.sys = None
+        self.page = None
         self.subsystems = []
         self.scratch = ""
 
@@ -67,7 +68,7 @@ class MCDU():
 
     def lsk(self, pos):
         """Forward the pressed Line Select Key to the page."""
-        self.page.lsk(pos)
+        if self.page: self.page.lsk(pos)
 
     def scratch_input(self, text):
         """Append a string to the scratchpad."""

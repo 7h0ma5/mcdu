@@ -69,6 +69,9 @@ class ACARS(Subsystem):
 
         self.api.progress(self.flightno, self.company, " ".join(message))
 
+    def inforeq(self, req, apt):
+        self.api.inforeq(self.flightno, req, apt)
+
 class PreflightPage(Page):
     title = "ACARS PREFLIGHT"
 
@@ -170,4 +173,66 @@ class RequestsPage(Page):
     title = "ACARS REQUESTS"
 
     def init(self):
+        self.field(0, "", "<ROUTE", action=self.route)
+        self.field(0, "", "WEATHER>", action=self.weather)
+        self.field(1, "", "<RELEASE", action=self.release)
+        self.field(1, "", "ATIS>", action=self.atis)
+        self.field(2, "", "<LOADSHEET", action=self.loadsheet)
+        self.field(3, "", "<ARR INFO", action=self.arr_info)
+        self.field(4, "", "")
+        self.field(4, "SEND", "TELEX>", action=self.telex)
+        self.field(5, "", "<RETURN", action=self.ret)
+
+    def route(self):
+        pass
+
+    def weather(self):
+        self.mcdu.page_set(WeatherRequestPage)
+
+    def release(self):
+        pass
+
+    def atis(self):
+        pass
+
+    def loadsheet(self):
+        pass
+
+    def arr_info(self):
+        pass
+
+    def telex(self):
+        pass
+
+    def ret(self):
+        self.sys.activate()
+
+class WeatherRequestPage(Page):
+    title = "ACARS WEATHER REQUEST"
+
+    def init(self):
+        self.field(0, "Airport", "_"*4, format=Field.icao, update=self.airport)
+        self.field(3, "", "")
+        self.field(3, "REQUEST", "METAR>", action=self.metar)
+        self.field(4, "RECEIVED", "<MESSAGES", action=self.messages)
+        self.field(4, "REQUEST", "TAF>", action=self.taf)
+        self.field(5, "RETURN TO", "<REQUESTS", action=self.requests)
+        self.field(5, "REQUEST", "SHORT TAF>", action=self.short_taf)
+
+    def airport(self, value):
+        self.apt = value
+
+    def metar(self):
+        self.sys.inforeq("metar", self.apt)
+
+    def taf(self):
+        self.sys.inforeq("taf", self.apt)
+
+    def short_taf(self):
+        self.sys.inforeq("shorttaf", self.apt)
+
+    def requests(self):
+        self.mcdu.page_set(RequestsPage)
+
+    def messages(self):
         pass
