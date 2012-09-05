@@ -26,13 +26,15 @@ class ACARS(Subsystem):
         self.altrnt = ""
         self.company = ""
         self.progress = []
-        self.messages = []
+        self.messages = [
+            ("telex", "1120Z", "EDDK", "Hallo Welt!")
+        ]
 
     def run(self):
         i = 0
         while self.running:
             if not i % 10:
-                print(i)
+                # every ten seconds
                 self.progress_update()
                 self.fetch_messages()
 
@@ -49,7 +51,8 @@ class ACARS(Subsystem):
     def fetch_messages(self):
         if not self.flightno: return
         messages = self.api.poll_acars(self.flightno)
-        self.messages.extend(messages)
+        messages.extend(self.messages)
+        self.messages = messages
         print(messages)
 
     def activate(self):
@@ -182,8 +185,53 @@ class PostflightPage(Page):
 class MessagesPage(Page):
     title = "ACARS MESSAGES"
 
+    def init(self):
+        self.field(5, "", "<RETURN", action=self.ret)
+
     def refresh(self):
+        messages = self.sys.messages
+        for i in range(5):
+            self.fields[i] = None
+
+            if i < len(messages):
+                message = messages[i]
+                self.field(i, message[0], message[2])
+                self.field(i, "", message[1] + ">")
+
         Page.refresh(self)
+
+    def lsk(self, pos):
+        num, side = pos
+
+        if num < 5 and num < len(self.sys.messages):
+            self.mcdu.page_set(MessagePage)
+            self.mcdu.page.message = self.sys.messages[num]
+            self.mcdu.page.refresh()
+        else:
+            Page.lsk(self, pos)
+
+    def ret(self):
+        self.sys.activate()
+
+class MessagePage(Page):
+    title = "ACARS MESSAGE"
+
+    def init(self):
+        self.message = None
+        self.field(5, "", "<RETURN", action=self.ret)
+
+    def refresh(self):
+        if self.message:
+            text = self.message[3]
+
+            for i in range(5):
+                self.fields[i] = None
+                self.field(i, "", text[i*24:(i+1)*24])
+
+        Page.refresh(self)
+
+    def ret(self):
+        self.mcdu.page_set(MessagesPage)
 
 class RequestsPage(Page):
     title = "ACARS REQUESTS"

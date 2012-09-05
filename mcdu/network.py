@@ -5,7 +5,7 @@ except ImportError:
     from urllib import urlencode
     from urllib2 import urlopen
 
-import re
+import re, time
 
 API_URL = "http://www.hoppie.nl/acars/system/connect.html"
 
@@ -30,7 +30,7 @@ class ACARS_API(object):
 
         return res.read().decode("utf-8")
 
-    def parse_messages(self, data):
+    def parse_data(self, data):
         if not data.startswith("ok") or len(data) < 3:
             return None
 
@@ -38,7 +38,11 @@ class ACARS_API(object):
 
         for match in re.finditer(regex, data):
             message = (match.group(2), match.group(1), match.group(3))
-            self.messages.append(message)
+            self.messages_append(message)
+
+    def messages_append(self, mtype, sender, text):
+        mtime = time.strftime("%H%MZ", time.gmtime())
+        self.messages.append((mtype, time, sender, text))
 
     def poll(self, callsign):
         data = {
@@ -47,7 +51,7 @@ class ACARS_API(object):
         }
 
         res = self.request("poll", data)
-        self.parse_messages(res)
+        self.parse_data(res)
 
     def poll_acars(self, callsign):
         self.poll(callsign)
@@ -57,6 +61,7 @@ class ACARS_API(object):
         for message in self.messages:
             if message[0] in ["telex", "metar", "taf", "shorttaf", "ads-c"]:
                 acars.append(message)
+                self.messages.remove(message)
 
         return acars
 
@@ -88,4 +93,6 @@ class ACARS_API(object):
         match = re.match(regex, resp)
 
         if (match):
-            self.messages.append(match.group(1))
+            mtime = time.strftime("%H%MZ", time.gmtime())
+            msg = (req, mtime, apt, match.group(1))
+            self.messages.append(msg)
