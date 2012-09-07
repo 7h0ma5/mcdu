@@ -1,14 +1,15 @@
 try:
     from urllib.parse import urlencode
     from urllib.request import urlopen
+    from urllib.error import URLError
 except ImportError:
     from urllib import urlencode
-    from urllib2 import urlopen
+    from urllib2 import URLError, urlopen
 
 import re, time
 
 #API_URL = "http://www.hoppie.nl/acars/system/connect.html"
-API_URL = "http://localhost:8123/"
+API_URL = "http://10.0.0.11:8123/"
 
 class ACARS_API(object):
     def __init__(self, logon):
@@ -30,19 +31,23 @@ class ACARS_API(object):
         params = urlencode(default_data)
         path = "%s?%s" % (API_URL, params)
 
-        res = urlopen(path)
-
-        return res.read().decode("utf-8")
+        try:
+            res = urlopen(path)
+        except URLError:
+            return ""
+        else:
+            return res.read().decode("utf-8")
 
     def parse_data(self, data):
-        print(data)
         if not data.startswith("ok") or len(data) < 3:
             return None
 
         regex = "\{([a-zA-Z0-9]+) ([a-z\-]+) \{(.*?)\}\}"
 
         for match in re.finditer(regex, data, re.DOTALL):
-            message = (match.group(2), match.group(1), match.group(3))
+            # remove unnecessary whitespace
+            msg_text = " ".join(match.group(3).split())
+            message = (match.group(2), match.group(1), msg_text)
             self.messages_append(message)
 
     def messages_append(self, message):

@@ -10,6 +10,7 @@ class ATC(Subsystem):
         Subsystem.__init__(self)
         self.api = api
         self.midn = 0
+        self.status = ""
         self.act = ""
         self.next = ""
         self.callsign = ""
@@ -19,6 +20,7 @@ class ATC(Subsystem):
         while self.running:
             if not i % 10:
                 self.fetch_messages()
+                print(self.status)
 
             time.sleep(1)
             i = i + 1
@@ -33,23 +35,41 @@ class ATC(Subsystem):
     def parse_message(self, message):
         cpdlc = message[3].split("/")
 
-        if cpdlc[1] != "data2": return
+        dtype, midn, mrn, ra, msg = cpdlc[1:6]
 
-        midn = cpdlc[2]
-        mrn = cpdlc[3]
-        ra = cpdlc[4]
-        msg = cpdlc[5]
+        if dtype != "data2": return
+        if not midn or not ra or not msg: return
+
+        print(midn, mrn, ra, msg)
 
         self.act = message[0]
 
-        print midn, mrn, ra, msg
+        if self.status == "sent":
+            if msg == "LOGON ACCEPTED":
+                self.status = "accepted"
+            else:
+                self.act = ""
+                self.status = "rejected"
 
-    def logon(self):
-        self.send_message("", "Y", "REQUEST LOGON")
+            return
 
-    def send_message(self, mrn, ra, msg):
+        if msg == "HANDOVER":
+            self.next = msg.split("@")[1]
+            return
+
+        if msg == "LOGOFF":
+            self.status = ""
+            self.act = ""
+            self.next = ""
+            return
+
+    def logon(self, station):
+        self.status = "sent"
+        self.send_message(station, "", "Y", "REQUEST LOGON")
+
+    def send_message(self, receiver, mrn, ra, msg):
         msg = "/data2/%i/%s/%s/%s" % (self.midn, mrn, ra, msg)
-        self.api.cpdlc(self.callsign, self.act, msg)
+        self.api.cpdlc(self.callsign, receiver, msg)
         self.midn += 1
 
     def activate(self):
@@ -59,7 +79,9 @@ class LogonPage(Page):
     title = "ATC LOGON"
 
     def init(self):
-        self.field(0, "LOGON_TO", "_"*4, format=Field.icao, update=self.station)
+        self.station = ""
+
+        self.field(0, "LOGON TO", "_"*4, format=Field.icao, update=self.logon_to)
         self.field(0, "STATUS", "LOGON>", action=self.logon)
         self.field(1, "FLT NO", "_"*7, format=Field.flightno, update=self.callsign)
         self.field(2, "ATC COMM", "<SELECT OFF", action=self.comm_off)
@@ -67,15 +89,16 @@ class LogonPage(Page):
         self.field(3, "", "")
         self.field(3, "NEXT CTR", "")
         self.field(4, "ADS ARM", "<SELECT OFF", action=self.ads_arm)
-        self.field(4, "ADS EMERG", "<SELECT ON", action=self.ads_emerg)
-        self.field(5, "------------", "<INDEX", action=self.index)
-        self.field(5, "------------", "")
+        self.field(4, "ADS EMERG", "SELECT ON>", action=self.ads_emerg)
+        self.field(5, "-"*24, "<INDEX", action=self.index)
 
-    def station(self, value):
-        self.sys.act = value
+    def logon_to(self, value):
+        self.station = value
 
     def logon(self):
-        self.sys.logon()
+        if self.station:
+            self.sys.logon(self.station)
+            self.field_update(0, 1, "SENT")
 
     def callsign(self, value):
         self.sys.callsign = value
