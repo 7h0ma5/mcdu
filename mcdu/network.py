@@ -7,7 +7,8 @@ except ImportError:
 
 import re, time
 
-API_URL = "http://www.hoppie.nl/acars/system/connect.html"
+#API_URL = "http://www.hoppie.nl/acars/system/connect.html"
+API_URL = "http://localhost:8123/"
 
 class ACARS_API(object):
     def __init__(self, logon):
@@ -23,6 +24,9 @@ class ACARS_API(object):
         }
 
         default_data.update(data)
+
+        print(default_data)
+
         params = urlencode(default_data)
         path = "%s?%s" % (API_URL, params)
 
@@ -31,18 +35,19 @@ class ACARS_API(object):
         return res.read().decode("utf-8")
 
     def parse_data(self, data):
+        print(data)
         if not data.startswith("ok") or len(data) < 3:
             return None
 
         regex = "\{([a-zA-Z0-9]+) ([a-z\-]+) \{(.*?)\}\}"
 
-        for match in re.finditer(regex, data):
+        for match in re.finditer(regex, data, re.DOTALL):
             message = (match.group(2), match.group(1), match.group(3))
             self.messages_append(message)
 
-    def messages_append(self, mtype, sender, text):
+    def messages_append(self, message):
         mtime = time.strftime("%H%MZ", time.gmtime())
-        self.messages.append((mtype, time, sender, text))
+        self.messages.append((message[0], mtime, message[1], message[2]))
 
     def poll(self, callsign):
         data = {
@@ -65,6 +70,18 @@ class ACARS_API(object):
 
         return acars
 
+    def poll_cpdlc(self, callsign):
+        self.poll(callsign)
+
+        cpdlc = []
+
+        for message in self.messages:
+            if message[0] == "cpdlc":
+                cpdlc.append(message)
+                self.messages.remove(message)
+
+        return cpdlc
+
     def telex(self, callsign, receiver, message):
         data = {
             "from": callsign,
@@ -72,6 +89,14 @@ class ACARS_API(object):
             "packet": message,
         }
         self.request("telex", data)
+
+    def cpdlc(self, callsign, receiver, message):
+        data = {
+            "from": callsign,
+            "to": receiver,
+            "packet": message,
+        }
+        self.request("cpdlc", data)
 
     def progress(self, callsign, receiver, message):
         data = {

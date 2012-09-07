@@ -26,15 +26,12 @@ class ACARS(Subsystem):
         self.altrnt = ""
         self.company = ""
         self.progress = []
-        self.messages = [
-            ("telex", "1120Z", "EDDK", "Hallo Welt!")
-        ]
+        self.messages = []
 
     def run(self):
         i = 0
         while self.running:
             if not i % 10:
-                # every ten seconds
                 self.progress_update()
                 self.fetch_messages()
 
