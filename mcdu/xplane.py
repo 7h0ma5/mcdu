@@ -52,5 +52,7 @@ class XPlaneReceiver(threading.Thread):
             elif packet[0] == 20:
                 update["pos"] = (round(packet[1], 8), round(packet[2], 8))
                 update["alt"] = int(round(packet[3]))
+            elif packet[0] == 37:
+                update["eng"] = (packet[1], packet[2], packet[3], packet[4])
 
         self.avionics.update(update)

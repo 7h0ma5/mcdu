@@ -21,6 +21,7 @@ class Avionics(object):
         self.temp = 0
         self.brk = True
         self.gear = True
+        self.eng = (0.0, 0.0, 0.0, 0.0)
 
         self.hdg_change = 0
         self.alt_change = 0
@@ -60,5 +61,5 @@ class Avionics(object):
 
         # detect in
         elif self.progress == 3:
-            if not self.speed and self.brk:
+            if not self.speed and self.brk and self.eng < (20, 20, 20, 20):
                 self.progress += 1

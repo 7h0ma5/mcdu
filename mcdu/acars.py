@@ -50,7 +50,6 @@ class ACARS(Subsystem):
         messages = self.api.poll_acars(self.flightno)
         messages.extend(self.messages)
         self.messages = messages
-        print(messages)
 
     def activate(self):
         if self.state == ACARS.preflight:
