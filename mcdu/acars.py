@@ -2,7 +2,7 @@ from mcdu.subsystem import Subsystem
 from mcdu.avionics import Avionics
 from mcdu.page import Page, Field
 
-import time
+import time, os
 
 class ACARS(Subsystem):
     name = "ACARS"
@@ -48,8 +48,16 @@ class ACARS(Subsystem):
     def fetch_messages(self):
         if not self.flightno: return
         messages = self.api.poll_acars(self.flightno)
+        [self.print_message(message) for message in messages]
         messages.extend(self.messages)
         self.messages = messages
+
+    def print_message(self, message):
+        printer = os.popen("lpr -o media=A6 -o wrap=true", "w")
+        data =  (message[0], message[1], message[2])
+        printer.write("%s %s %s\n\n" % data)
+        printer.write(message[3])
+        printer.close()
 
     def activate(self):
         if self.state == ACARS.preflight:

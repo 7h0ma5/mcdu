@@ -8,8 +8,8 @@ except ImportError:
 
 import re, time
 
-#API_URL = "http://www.hoppie.nl/acars/system/connect.html"
-API_URL = "http://10.0.0.11:8123/"
+API_URL = "http://www.hoppie.nl/acars/system/connect.html"
+#API_URL = "http://10.0.0.11:8123/"
 
 class ACARS_API(object):
     def __init__(self, logon):
@@ -69,7 +69,7 @@ class ACARS_API(object):
         acars = []
 
         for message in self.messages:
-            if message[0] in ["telex", "metar", "taf", "shorttaf", "ads-c"]:
+            if message[0] in ["telex", "metar", "taf", "shorttaf"]:
                 acars.append(message)
                 self.messages.remove(message)
 
