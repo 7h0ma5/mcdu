@@ -22,8 +22,13 @@ class ATC(Subsystem):
                 self.fetch_messages()
                 print(self.status)
 
+                if self.next:
+                    self.logon(self.next)
+
             time.sleep(1)
             i = i + 1
+
+        self.logoff()
 
     def fetch_messages(self):
         if not self.callsign: return
@@ -46,6 +51,7 @@ class ATC(Subsystem):
 
         if self.status == "sent":
             if msg == "LOGON ACCEPTED":
+                self.next = ""
                 self.status = "accepted"
             else:
                 self.act = ""
@@ -64,8 +70,13 @@ class ATC(Subsystem):
             return
 
     def logon(self, station):
-        self.status = "sent"
+        self.status = ""
         self.send_message(station, "", "Y", "REQUEST LOGON")
+        self.status = "sent"
+
+    def logoff(self):
+        if not self.act: return
+        self.send_message(self.act, "", "N", "LOGOFF")
 
     def send_message(self, receiver, mrn, ra, msg):
         msg = "/data2/%i/%s/%s/%s" % (self.midn, mrn, ra, msg)
