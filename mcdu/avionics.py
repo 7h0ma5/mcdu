@@ -61,5 +61,5 @@ class Avionics(object):
 
         # detect in
         elif self.progress == 3:
-            if not self.speed and self.brk and self.eng < (20, 20, 20, 20):
+            if not self.speed and self.brk and self.eng < (5, 5, 5, 5):
                 self.progress += 1

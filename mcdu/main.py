@@ -4,7 +4,8 @@ from mcdu.core import MCDU
 from mcdu.acars import ACARS
 from mcdu.atc import ATC
 from mcdu.network import ACARS_API
-from mcdu.xplane import XPlaneReceiver
+#from mcdu.xplane import XPlaneReceiver
+from mcdu.fsx import FSXReceiver
 
 import os, sys, pyglet
 import pyglet.resource
@@ -25,7 +26,8 @@ def run():
     config.read("~/.config/mcdu.cfg")
     config.read("config/mcdu.cfg")
 
-    receiver = XPlaneReceiver()
+    #receiver = XPlaneReceiver()
+    receiver = FSXReceiver()
     receiver.start()
 
     api = ACARS_API(config.get("ACARS", "logon"))

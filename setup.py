@@ -18,6 +18,24 @@ if sys.platform == "darwin":
             ("res", glob("res/*"))
         ],
     )
+elif sys.platform == "win32":
+    import py2exe
+    extra_options = dict(
+        windows=[{"script": "mcdu/main.py", "dest_base": "mcdu"}],
+        options=dict(
+            py2exe={
+                "includes": ["pyuipc", "pyglet"],
+                "bundle_files": 1,
+                "compressed": True,
+                "dll_excludes": ["w9xpopen.exe"],
+            }
+        ),
+        data_files = [
+            ("config", glob("config/*")),
+	    ("res", glob("res/*")),
+	],
+        zipfile=None,
+    )
 else:
     extra_options = dict(
         data_files = [

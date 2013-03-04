@@ -25,7 +25,7 @@ class Display(pyglet.window.Window):
             if not i % 2 or i == 13:
                 document.set_style(0, 0, {
                         "font_name": "Inconsolata",
-                        "font_size": 15,
+			"font_size": 15,
                         "color": (80, 250, 80, 255),
                 })
                 text_layout.x = 64
