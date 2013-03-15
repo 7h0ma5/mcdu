@@ -6,9 +6,12 @@ from mcdu.atc import ATC
 from mcdu.network import ACARS_API
 #from mcdu.xplane import XPlaneReceiver
 from mcdu.fsx import FSXReceiver
+from mcdu.websocket import WebSocket
 
-import os, sys, pyglet
-import pyglet.resource
+import tornado.ioloop
+import tornado.web
+
+import os, sys, webbrowser
 
 try:
     from configparser import SafeConfigParser
@@ -16,13 +19,8 @@ except ImportError:
     from ConfigParser import SafeConfigParser
 
 def run():
-    pyglet.resource.path.append(os.getcwd())
-    pyglet.resource.path.append("/usr/share/mcdu")
-    pyglet.resource.path.append("/usr/local/share/mcdu")
-    pyglet.resource.reindex()
-
     config = SafeConfigParser()
-    config.readfp(pyglet.resource.file("config/defaults.cfg", "r"))
+    config.read("config/defaults.cfg")
     config.read("~/.config/mcdu.cfg")
     config.read("config/mcdu.cfg")
 
@@ -37,9 +35,20 @@ def run():
     mcdu = MCDU()
     mcdu.subsystem_register(acars)
     mcdu.subsystem_register(atc)
+    mcdu.menu()
+
+    application = tornado.web.Application([
+        (r"^/socket", WebSocket, dict(mcdu=mcdu)),
+        (r"^/(.*)$", tornado.web.StaticFileHandler, {"path": "res/", "default_filename": "index.html"}),
+    ], debug=False)
+
+    port = config.getint("General", "port")
+    application.listen(port)
 
     try:
-        pyglet.app.run()
+        print("running on port %i" % port)
+        webbrowser.open_new("http://localhost:%i" % port)
+        tornado.ioloop.IOLoop.instance().start()
     except KeyboardInterrupt:
         print("quitting...")
     except Exception as e:
@@ -50,8 +59,6 @@ def run():
         receiver.stop()
         acars.stop()
         atc.stop()
-        mcdu.display.close()
-        pyglet.app.exit()
         sys.exit(0)
 
 if __name__ == "__main__":

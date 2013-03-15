@@ -28,11 +28,11 @@ class FSXReceiver(threading.Thread):
     def run(self):
         while self.active:
             if not self.connected:
-                print("no connection")
                 self.connected = self.connect()
                 time.sleep(2)
                 continue
-            
+
+            print("connected to fsx!")
             self.read()
             time.sleep(5)
 

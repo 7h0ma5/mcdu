@@ -95,13 +95,13 @@ class PreflightPage(Page):
 
     def init(self):
         self.field(0, "SYSTEM INIT", "<ARM", action=self.arm)
-        self.field(0, "FLT NO", "_"*7, format=Field.flightno, update=self.flightno)
-        self.field(1, "ORIGIN", "_"*4, format=Field.icao, update=self.origin)
-        self.field(1, "PLAN DEP", "_"*5, format=Field.time, update=self.plan_dep)
-        self.field(2, "DEST", "_"*4, format=Field.icao, update=self.dest)
-        self.field(2, "ETA", "_"*5,  format=Field.time, update=self.eta)
-        self.field(3, "ALTRNT", "_"*4, format=Field.icao, update=self.altrnt)
-        self.field(3, "COMPANY", "___", format="^[A-Z]{3}$", update=self.company)
+        self.field(0, "FLT NO", 7, format=Field.flightno, update=self.flightno)
+        self.field(1, "ORIGIN", 4, format=Field.icao, update=self.origin)
+        self.field(1, "PLAN DEP", 5, format=Field.time, update=self.plan_dep)
+        self.field(2, "DEST", 4, format=Field.icao, update=self.dest)
+        self.field(2, "ETA", 5,  format=Field.time, update=self.eta)
+        self.field(3, "ALTRNT", -4, format=Field.icao, update=self.altrnt)
+        self.field(3, "COMPANY", 3, format="^[A-Z]{3}$", update=self.company)
         self.field(4, "RECEIVED", "<MESSAGES", action=self.messages)
         self.field(4, "", "REQUESTS>", action=self.requests)
         self.field(5, "ACARS", "<INDEX", action=self.index)
@@ -279,7 +279,7 @@ class WeatherRequestPage(Page):
     title = "ACARS WEATHER REQUEST"
 
     def init(self):
-        self.field(0, "Airport", "_"*4, format=Field.icao, update=self.airport)
+        self.field(0, "Airport", 4, format=Field.icao, update=self.airport)
         self.field(3, "", "")
         self.field(3, "REQUEST", "METAR>", action=self.metar)
         self.field(4, "RECEIVED", "<MESSAGES", action=self.messages)

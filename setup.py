@@ -21,7 +21,7 @@ if sys.platform == "darwin":
 elif sys.platform == "win32":
     import py2exe
     extra_options = dict(
-        windows=[{"script": "mcdu/main.py", "dest_base": "mcdu"}],
+        console=[{"script": "mcdu/main.py", "dest_base": "mcdu"}],
         options=dict(
             py2exe={
                 "includes": ["pyuipc", "pyglet"],

@@ -1,0 +1,84 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "AirbusMCDUa", Inconsolata;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    cursor: default;
+}
+
+a {
+    position: absolute;
+    cursor: pointer;
+}
+
+#status {
+    position: absolute;
+    background-color: #ff0000;
+    left: 19px;
+    top: 392px;
+    width: 12px;
+    height: 82px;
+    opacity:0.1;
+}
+
+#mcdu {
+    background: url(mcdu.png) no-repeat;
+    width: 366px;
+    height: 570px;
+}
+
+#display {
+    color: #fff;
+    position: absolute;
+    left: 50px;
+    top: 33px;
+    width: 270px;
+    height: 215px;
+    vertical-align: top;
+    line-height: 0px;
+}
+
+#display tr:nth-child(1) {
+    text-align: left;
+}
+
+#display tr td:nth-child(2) {
+    text-align: right;
+}
+
+#display tr:nth-child(2n) {
+    font-size: 11px;
+}
+
+#display tr:nth-child(2n+1) {
+    font-size: 17px;
+}
+
+#title {
+    font-size: 19px;
+    text-align: center;
+}
+
+#scratch {
+    font-size: 17px;
+}
+
+#LSK0L { top: 62px; left: 0px; width: 33px; height: 25px; }
+#LSK1L { top: 92px; left: 0px; width: 33px; height: 25px; }
+#LSK2L { top: 120px; left: 0px; width: 33px; height: 25px; }
+#LSK3L { top: 149px; left: 0px; width: 33px; height: 25px; }
+#LSK4L { top: 178px; left: 0px; width: 33px; height: 25px; }
+#LSK5L { top: 207px; left: 0px; width: 33px; height: 25px; }
+#LSK0R { top: 62px; left: 333px; width: 33px; height: 25px; }
+#LSK1R { top: 92px; left: 333px; width: 33px; height: 25px; }
+#LSK2R { top: 120px; left: 333px; width: 33px; height: 25px; }
+#LSK3R { top: 149px; left: 333px; width: 33px; height: 25px; }
+#LSK4R { top: 178px; left: 333px; width: 33px; height: 25px; }
+#LSK5R { top: 207px; left: 333px; width: 33px; height: 25px; }
+#MENU { top: 340px; left: 46px; width: 37px; height: 29px; }

@@ -91,17 +91,16 @@ class LogonPage(Page):
 
     def init(self):
         self.station = ""
-
-        self.field(0, "LOGON TO", "_"*4, format=Field.icao, update=self.logon_to)
+        
+        self.field(0, "LOGON TO", 4, format=Field.icao, update=self.logon_to)
         self.field(0, "STATUS", "LOGON>", action=self.logon)
-        self.field(1, "FLT NO", "_"*7, format=Field.flightno, update=self.callsign)
+        self.field(1, "FLT NO", 7, format=Field.flightno, update=self.callsign)
         self.field(2, "ATC COMM", "<SELECT OFF", action=self.comm_off)
         self.field(2, "ACT CTR", "")
         self.field(3, "", "")
         self.field(3, "NEXT CTR", "")
         self.field(4, "ADS ARM", "<SELECT OFF", action=self.ads_arm)
         self.field(4, "ADS EMERG", "SELECT ON>", action=self.ads_emerg)
-        self.field(5, "-"*24, "<INDEX", action=self.index)
 
     def logon_to(self, value):
         self.station = value

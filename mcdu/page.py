@@ -15,30 +15,13 @@ class Page(object):
         self.sys = sys
 
         if not self.fields:
-            self.fields = [None for i in range(6)]
+            self.fields = [[] for i in range(6)]
             init = getattr(self, "init", None)
             if init: init()
 
     def refresh(self):
-        self.mcdu.row_set(0, [self.title])
-
-        for i in range(6):
-            fields = self.fields[i]
-            if not fields: continue
-
-            title = []
-            for field in fields:
-                title.append(field.title)
-
-            if len(title) == 1: title.append("")
-            self.mcdu.row_set(i*2+1, title)
-
-            value = []
-            for field in fields:
-                value.append(field.value)
-
-            if len(value) == 1: value.append("")
-            self.mcdu.row_set(i*2+2, value)
+        if self.mcdu.page == self:
+            self.mcdu.update()
 
     def field(self, index, title, value, **kwargs):
         field = Field(title, value, **kwargs)
@@ -51,11 +34,7 @@ class Page(object):
     def field_update(self, index, col, value):
         field = self.fields[index][col]
         field.value = value
-        self.field_render(index, col, value)
-
-    def field_render(self, index, col, value):
-        self.mcdu.rows[index*2+2][col] = value
-        self.mcdu.row_render(index*2+2)
+        self.mcdu.update_row(index)
 
     def lsk(self, pos):
         num, side = pos
@@ -100,14 +79,35 @@ class Field(object):
     time = "^([01][0-9]|2[0-3])[0-5][0-9]Z$"
     icao = "^[A-Z]{4}$"
 
+    white = "#ffffff"
+    blue = "#20c2e3"
+    orange = "#ffaf47"
+
     def __init__(self, title, value, **kwargs):
         self.title = title
-        self.value = value
-
         self.format = kwargs.pop("format", None)
         self.action = kwargs.pop("action", None)
         self.update = kwargs.pop("update", None)
+        self.color = kwargs.pop("color", Field.white)
+
+        if self.action:
+            self.color = Field.blue
+
+        if (type(value) == int):
+            if value < 0:
+                self.color = Field.blue
+                self.value = u"\u23b5"*(-value)
+            elif value > 0:
+                self.color = Field.orange
+                self.value = u"\u25af"*value
+            else:
+                self.value = ""
+        else:
+            self.value = value
 
     def validate(self, value):
         if self.format and not re.match(self.format, value):
             raise ValueError
+
+    def dump(self):
+        return {"title": self.title, "value": self.value, "color": self.color}
