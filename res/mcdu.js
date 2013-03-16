@@ -58,6 +58,23 @@ function socketMsg(evt) {
 
 function buttonClick() {
     var id = $(this).attr("id");
+    
+    if (id.substring(0, 3) == "NUM") {
+	id = id.substring(3, 4);
+    }
+    else if (id == "DOT") {
+	id = ".";
+    }
+    else if (id == "SP") {
+	id = " ";
+    }
+    else if (id == "SLASH") {
+	id = "/";
+    }
+    else if (id == "PLUSMINUS") {
+	id = "-";
+    }
+    
     socketSend(id);
 }
 
@@ -75,7 +92,7 @@ $(document).keydown(function(dat) {
     else if (dat.keyCode >= 97 && dat.keyCode <= 122) {
 	key = String.fromCharCode(dat.keyCode-32);	
     }
-    else if (dat.keyCode >= 45 && dat.keyCode <= 57) {
+    else if (dat.keyCode >= 47 && dat.keyCode <= 57) {
 	key = String.fromCharCode(dat.keyCode);
     }
     else if (dat.keyCode == 8) {
