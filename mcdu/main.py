@@ -4,8 +4,6 @@ from mcdu.core import MCDU
 from mcdu.acars import ACARS
 from mcdu.atc import ATC
 from mcdu.network import ACARS_API
-#from mcdu.xplane import XPlaneReceiver
-from mcdu.fsx import FSXReceiver
 from mcdu.websocket import WebSocket
 
 import tornado.ioloop
@@ -24,8 +22,17 @@ def run():
     config.read("~/.config/mcdu.cfg")
     config.read("config/mcdu.cfg")
 
-    #receiver = XPlaneReceiver()
-    receiver = FSXReceiver()
+    sim = config.get("General", "sim")
+    if sim == "fsx":
+        from mcdu.fsx import FSXReceiver
+        receiver = FSXReceiver()
+    elif sim == "xplane":
+        from mcdu.xplane import XPlaneReceiver
+        receiver = XPlaneReceiver()
+    else:
+        print("no simulator set");
+        return 1
+
     receiver.start()
 
     api = ACARS_API(config.get("ACARS", "logon"))
@@ -59,7 +66,7 @@ def run():
         receiver.stop()
         acars.stop()
         atc.stop()
-        sys.exit(0)
+        return 0
 
 if __name__ == "__main__":
-    run()
+    sys.exit(run())

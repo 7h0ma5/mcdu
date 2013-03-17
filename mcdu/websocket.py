@@ -8,7 +8,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
     def open(self):
         self.mcdu.add_display(self)
- 
+
     def on_message(self, message):
         if message == "DEL":
             self.mcdu.scratch_delete()
@@ -47,4 +47,3 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
     def on_close(self):
         self.mcdu.remove_display(self)
-        print "Socket closed"

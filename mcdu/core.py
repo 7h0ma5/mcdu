@@ -30,7 +30,6 @@ class MCDU():
 
     def lsk(self, pos):
         """Forward the pressed Line Select Key to the page."""
-        print pos
         if self.page: self.page.lsk(pos)
 
     def scratch_input(self, text):
