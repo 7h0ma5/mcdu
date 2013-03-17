@@ -17,6 +17,10 @@ a {
     cursor: pointer;
 }
 
+audio {
+    display: none;
+}
+
 #status {
     position: absolute;
     background-color: #ff0000;

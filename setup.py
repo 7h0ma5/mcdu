@@ -14,7 +14,7 @@ if sys.platform == "darwin":
             )
         ),
         data_files = [
-            ("config", glob("config/*")),
+            ("config", glob("config/defaults.cfg")),
             ("res", glob("res/*"))
         ],
     )
@@ -31,7 +31,7 @@ elif sys.platform == "win32":
             }
         ),
         data_files = [
-            ("config", glob("config/*")),
+            ("config", glob("config/defaults.cfg")),
 	    ("res", glob("res/*")),
 	],
         zipfile=None,
@@ -39,7 +39,7 @@ elif sys.platform == "win32":
 else:
     extra_options = dict(
         data_files = [
-            ("share/mcdu/config", glob("config/*")),
+            ("share/mcdu/config", glob("config/defaults.cfg")),
             ("share/mcdu/res", glob("res/*"))
         ],
     )

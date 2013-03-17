@@ -1,5 +1,9 @@
 var socket;
 
+function clickSound() {
+    $("#click-sound")[0].play();
+}
+
 function socketReconnect() {
     $("#status").css("background-color", "orange");
 
@@ -56,7 +60,12 @@ function socketMsg(evt) {
     }
 }
 
-function buttonClick() {
+function buttonClick(evt) {
+    clickSound();
+
+    evt.stopPropagation();
+    evt.preventDefault();
+
     var id = $(this).attr("id");
     
     if (id.substring(0, 3) == "NUM") {
@@ -79,32 +88,33 @@ function buttonClick() {
 }
 
 $(document).ready(function() {
-    $("a").click(buttonClick);
+    $("a").on("click", buttonClick);
     socketReconnect();
 });
 
-$(document).keydown(function(dat) {
+$(document).keydown(function(evt) {
     var key;
 
-    if (dat.keyCode >= 65 && dat.keyCode <= 90) {
-	key = String.fromCharCode(dat.keyCode);
+    if (evt.keyCode >= 65 && evt.keyCode <= 90) {
+	key = String.fromCharCode(evt.keyCode);
     }
-    else if (dat.keyCode >= 97 && dat.keyCode <= 122) {
-	key = String.fromCharCode(dat.keyCode-32);	
+    else if (evt.keyCode >= 97 && evt.keyCode <= 122) {
+	key = String.fromCharCode(evt.keyCode-32);	
     }
-    else if (dat.keyCode >= 47 && dat.keyCode <= 57) {
-	key = String.fromCharCode(dat.keyCode);
+    else if (evt.keyCode >= 47 && evt.keyCode <= 57) {
+	key = String.fromCharCode(evt.keyCode);
     }
-    else if (dat.keyCode == 8) {
+    else if (evt.keyCode == 8) {
 	key = "DEL";
     }
-    else if (dat.keyCode == 46) {
+    else if (evt.keyCode == 46) {
 	key = "CLR";
     }
     else {
 	return true;
     }
 
+    evt.preventDefault();
     socketSend(key);
     return false;
 });
