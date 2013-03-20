@@ -23,10 +23,12 @@ class Avionics(object):
         self.gear = True
         self.eng = (0.0, 0.0, 0.0, 0.0)
 
+        self.reset()
+
+    def reset(self):
+        self.progress = 0
         self.hdg_change = 0
         self.alt_change = 0
-
-        self.progress = 0
 
     def update(self, data):
         if self.active:

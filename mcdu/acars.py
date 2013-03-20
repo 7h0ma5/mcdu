@@ -32,26 +32,32 @@ class ACARS(Subsystem):
         i = 0
         while self.running:
             if not i % 10:
-                self.progress_update()
+                if self.armed: self.progress_update()
                 self.fetch_messages()
 
             time.sleep(1)
             i = i + 1
 
     def progress_update(self):
-        if self.avionics.progress > len(self.progress):
+        if self.avionics.progress <= len(self.progress):
+            return
+
+        for i in range(self.avionics.progress - len(self.progress)):
             ptime = time.strftime("%H%MZ", time.gmtime())
             self.progress.append(ptime)
-            if self.armed:
-                self.report()
+            self.report()
+
+        self.refresh()
 
     def fetch_messages(self):
         if not self.flightno: return
+
         messages = self.api.poll_acars(self.flightno)
-        if len(messages) > 0:
-            messages.extend(self.messages)
-            self.messages = messages
-            self.refresh()
+        if len(messages) < 0: return
+
+        messages.extend(self.messages)
+        self.messages = messages
+        self.refresh()
 
     def print_message(self, message):
         printer = os.popen("lpr -o media=A6 -o wrap=true", "w")
@@ -123,12 +129,22 @@ class IndexPage(Page):
 class OOOIPage(Page):
     title = "OOOI TIMES"
 
-    def init(self):
-        self.field(0, "OUT", "----")
-        self.field(1, "OFF", "----")
-        self.field(2, "ON", "----")
-        self.field(3, "IN", "----")
+    def refresh(self):
+        self.clear()
+
+        self.field(0, "OUT", self.format_time(0))
+        self.field(1, "OFF", self.format_time(1))
+        self.field(2, "ON", self.format_time(2))
+        self.field(3, "IN", self.format_time(3))
         self.field(5, "", "<RETURN", action=self.ret)
+
+        Page.refresh(self)
+
+    def format_time(self, index):
+        if len(self.sys.progress) > index:
+            return self.sys.progress[index]
+        else:
+            return "----"
 
     def ret(self):
         self.mcdu.show(IndexPage)
@@ -151,7 +167,7 @@ class PreflightPage(Page):
         self.field(5, "", "INFLIGHT>", action=self.inflight)
 
     def arm(self):
-        self.sys.avionics.progress = 0
+        self.sys.avionics.reset()
         self.sys.armed = True
         self.field_update(0, 0, "ARMED")
 
