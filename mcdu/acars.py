@@ -2,7 +2,7 @@ from mcdu.subsystem import Subsystem
 from mcdu.avionics import Avionics
 from mcdu.page import Page, Field
 
-import time, os
+import textwrap, time, os
 
 class ACARS(Subsystem):
     name = "ACARS"
@@ -48,24 +48,25 @@ class ACARS(Subsystem):
     def fetch_messages(self):
         if not self.flightno: return
         messages = self.api.poll_acars(self.flightno)
-        [self.print_message(message) for message in messages]
-        messages.extend(self.messages)
-        self.messages = messages
+        if len(messages) > 0:
+            messages.extend(self.messages)
+            self.messages = messages
+            self.refresh()
 
     def print_message(self, message):
         printer = os.popen("lpr -o media=A6 -o wrap=true", "w")
-        data =  (message[0], message[1], message[2])
+        data = (message[0], message[1], message[2])
         printer.write("%s %s %s\n\n" % data)
         printer.write(message[3])
         printer.close()
 
     def activate(self):
         if self.state == ACARS.preflight:
-            self.mcdu.page_set(PreflightPage)
+            self.mcdu.show(PreflightPage)
         elif self.state == ACARS.inflight:
-            self.mcdu.page_set(InflightPage)
+            self.mcdu.show(InflightPage)
         elif self.state == ACARS.postflight:
-            self.mcdu.page_set(PostflightPage)
+            self.mcdu.show(PostflightPage)
 
     def report(self):
         message = ["%s/%s" % (self.origin, self.dest)]
@@ -89,6 +90,48 @@ class ACARS(Subsystem):
 
     def inforeq(self, req, apt):
         self.api.inforeq(self.flightno, req, apt)
+
+class IndexPage(Page):
+    title = "ACARS MENU"
+
+    def init(self):
+        self.field(0, "", "<INITIALIZATION", action=self.initialize)
+        self.field(1, "", "<OOOI TIMES", action=self.oooi)
+        self.field(2, "", "<RECEIVED MESSAGES", action=self.received_msgs)
+        self.field(3, "", "<ATIS", action=self.atis)
+        self.field(4, "", "<LINK TEST", action=self.test)
+        self.field(4, "", "FREE TEXT>", action=self.text)
+
+    def initialize(self):
+        pass
+
+    def oooi(self):
+        self.mcdu.show(OOOIPage)
+
+    def received_msgs(self):
+        self.mcdu.show(MessagesPage)
+
+    def atis(self):
+        pass
+
+    def test(self):
+        pass
+
+    def text(self):
+        pass
+
+class OOOIPage(Page):
+    title = "OOOI TIMES"
+
+    def init(self):
+        self.field(0, "OUT", "----")
+        self.field(1, "OFF", "----")
+        self.field(2, "ON", "----")
+        self.field(3, "IN", "----")
+        self.field(5, "", "<RETURN", action=self.ret)
+
+    def ret(self):
+        self.mcdu.show(IndexPage)
 
 class PreflightPage(Page):
     title = "ACARS PREFLIGHT"
@@ -134,17 +177,17 @@ class PreflightPage(Page):
         self.sys.company = value
 
     def messages(self):
-        self.mcdu.page_set(MessagesPage)
+        self.mcdu.show(MessagesPage)
 
     def requests(self):
-        self.mcdu.page_set(RequestsPage)
+        self.mcdu.show(RequestsPage)
 
     def index(self):
-        print("index")
+        self.mcdu.show(IndexPage)
 
     def inflight(self):
         self.sys.state = ACARS.inflight
-        self.mcdu.page_set(InflightPage)
+        self.mcdu.show(InflightPage)
 
 class InflightPage(Page):
     title = "ACARS INFLIGHT"
@@ -168,17 +211,17 @@ class InflightPage(Page):
         self.sys.altrnt = value
 
     def messages(self):
-        self.mcdu.page_set(MessagesPage)
+        self.mcdu.show(MessagesPage)
 
     def requests(self):
-        self.mcdu.page_set(RequestsPage)
+        self.mcdu.show(RequestsPage)
 
     def index(self):
-        print("index")
+        self.mcdu.show(IndexPage)
 
     def postflight(self):
         self.sys.state = ACARS.postflight
-        self.mcdu.page_set(PostflightPage)
+        self.mcdu.show(PostflightPage)
 
 class PostflightPage(Page):
     title = "ACARS POSTFLIGHT"
@@ -189,26 +232,24 @@ class PostflightPage(Page):
 class MessagesPage(Page):
     title = "ACARS MESSAGES"
 
-    def init(self):
-        self.field(5, "", "<RETURN", action=self.ret)
-
     def refresh(self):
+        self.clear()
+
         messages = self.sys.messages
         for i in range(5):
-            self.fields[i] = None
-
             if i < len(messages):
                 message = messages[i]
                 self.field(i, message[0], message[2])
                 self.field(i, "", message[1] + ">")
 
+        self.field(5, "", "<RETURN", action=self.ret)
         Page.refresh(self)
 
     def lsk(self, pos):
         num, side = pos
 
         if num < 5 and num < len(self.sys.messages):
-            self.mcdu.page_set(MessagePage)
+            self.mcdu.show(MessagePage)
             self.mcdu.page.message = self.sys.messages[num]
             self.mcdu.page.refresh()
         else:
@@ -222,20 +263,22 @@ class MessagePage(Page):
 
     def init(self):
         self.message = None
-        self.field(5, "", "<RETURN", action=self.ret)
 
     def refresh(self):
+        self.clear()
+
         if self.message:
-            text = self.message[3]
+            text = textwrap.wrap(self.message[3], 24)
 
             for i in range(5):
-                self.fields[i] = None
-                self.field(i, "", text[i*24:(i+1)*24])
+                if i < len(text):
+                    self.field(i, "", text[i])
 
+        self.field(5, "", "<RETURN", action=self.ret)
         Page.refresh(self)
 
     def ret(self):
-        self.mcdu.page_set(MessagesPage)
+        self.mcdu.show(MessagesPage)
 
 class RequestsPage(Page):
     title = "ACARS REQUESTS"
@@ -255,7 +298,7 @@ class RequestsPage(Page):
         pass
 
     def weather(self):
-        self.mcdu.page_set(WeatherRequestPage)
+        self.mcdu.show(WeatherRequestPage)
 
     def release(self):
         pass
@@ -300,7 +343,7 @@ class WeatherRequestPage(Page):
         self.sys.inforeq("shorttaf", self.apt)
 
     def requests(self):
-        self.mcdu.page_set(RequestsPage)
+        self.mcdu.show(RequestsPage)
 
     def messages(self):
-        self.mcdu.page_set(MessagesPage)
+        self.mcdu.show(MessagesPage)

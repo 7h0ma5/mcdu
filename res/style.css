@@ -48,29 +48,36 @@ audio {
     line-height: 0px;
 }
 
-#display tr:nth-child(1) {
-    text-align: left;
+#display span {
+    overflow: visible;
+    white-space: nowrap;
 }
 
-#display tr td:nth-child(2) {
-    text-align: right;
+#display tr td span:nth-child(1) {
+    float: left;
 }
 
-#display tr:nth-child(2n) {
+#display tr td span:nth-child(2) {
+    float: right;
+}
+
+#display tr:nth-child(2n) td {
+    padding-top: 5px;
     font-size: 11px;
 }
 
-#display tr:nth-child(2n+1) {
+#display tr:nth-child(2n+1) td {
     font-size: 17px;
 }
 
 #title {
-    font-size: 19px;
+    font-size: 19px ! important;
     text-align: center;
+    padding-bottom: 5px;
 }
 
 #scratch {
-    font-size: 17px;
+    font-size: 17px ! important;
 }
 
 #LSK0L { top: 62px; left: 0px; width: 33px; height: 25px; }

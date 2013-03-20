@@ -8,5 +8,9 @@ class Subsystem(threading.Thread):
         self.running = True
         self.mcdu = mcdu
 
+    def refresh(self):
+        if self.mcdu and self.mcdu.sys == self:
+            self.mcdu.page.refresh()
+
     def stop(self):
         self.running = False

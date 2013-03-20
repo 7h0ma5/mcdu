@@ -54,8 +54,8 @@ function socketMsg(evt) {
 		color = fields[j]["color"];
 	    }
 	    
-	    $("#display tr").eq(2*i+1).find("td").eq(j).text(title);
-	    $("#display tr").eq(2*i+2).find("td").eq(j).text(value).css("color", color);
+	    $("#display tr").eq(2*i+1).find("span").eq(j).text(title);
+	    $("#display tr").eq(2*i+2).find("span").eq(j).text(value).css("color", color);
 	}
     }
 }

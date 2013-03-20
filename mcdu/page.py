@@ -15,9 +15,12 @@ class Page(object):
         self.sys = sys
 
         if not self.fields:
-            self.fields = [[] for i in range(6)]
+            self.clear()
             init = getattr(self, "init", None)
             if init: init()
+
+    def clear(self):
+        self.fields = [[] for i in range(6)]
 
     def refresh(self):
         if self.mcdu.page == self:

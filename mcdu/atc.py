@@ -84,7 +84,7 @@ class ATC(Subsystem):
         self.midn += 1
 
     def activate(self):
-        self.mcdu.page_set(LogonPage)
+        self.mcdu.show(LogonPage)
 
 class LogonPage(Page):
     title = "ATC LOGON"

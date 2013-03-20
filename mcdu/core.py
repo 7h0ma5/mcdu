@@ -21,12 +21,12 @@ class MCDU():
 
     def menu(self):
         """Show the menu page."""
-        self.page_set(MenuPage)
+        self.show(MenuPage)
 
-    def page_set(self, page):
+    def show(self, page):
         """Switch to the given page."""
         self.page = page(self, self.sys)
-        self.update()
+        self.page.refresh()
 
     def lsk(self, pos):
         """Forward the pressed Line Select Key to the page."""
